@@ -7,7 +7,8 @@ on:
 
 jobs:
   rules:
-    runs-on: ubuntu-latest
+    # Pinned so a runner image change can't move the snapshot below on its own.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 

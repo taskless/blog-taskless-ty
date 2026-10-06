@@ -1,6 +1,6 @@
 # taskless-and-ty
 
-On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs both tools over the same code. pylint and ruff run alongside, since they're the linters a Python team already has.
+On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs it next to ty over the same code. pylint and ruff run alongside, since they're the linters a Python team already has.
 
 ## Run it
 
@@ -33,7 +33,7 @@ ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. T
 
 ## Scorecard
 
-Current output of `scripts/compare.sh` over `examples/`:
+What `scripts/compare.sh` shows over `examples/`, by thread example:
 
 | Thread example | Taskless rule | Result |
 | --- | --- | --- |
@@ -114,13 +114,15 @@ It's still name resolution. `Payload = Order` as a type alias, a TypedDict built
 
 ```
 examples/                      thread code plus negative cases, one file per check
+examples/compare.expected.txt  the table CI expects compare.sh to print
 .taskless/rules/sg/            one directory per rule, each with a .tests/ file
 .taskless/rules/runtime/       the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
-pyproject.toml                 pins ty, pylint and ruff
-package.json                   pins the Taskless CLI
 scripts/compare.sh             the side-by-side table
 scripts/tools.py               how each of the four tools is run, shared by both scripts
-examples/compare.expected.txt  the table CI expects compare.sh to print
-corpus/run.py                  the real-codebase run; repos pinned in corpus/repos.txt
+corpus/repos.txt               the six codebases, each pinned to a commit
+corpus/run.py                  the real-codebase run
 corpus/results/                each tool's findings, one per line
+.github/workflows/             CI: rule tests and the snapshot check
+pyproject.toml                 pins ty, pylint and ruff
+package.json                   pins the Taskless CLI
 ```
