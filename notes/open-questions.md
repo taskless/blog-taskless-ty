@@ -15,3 +15,7 @@ The rules use Taskless 0.12's per-rule directory layout, so the repo pins a 0.12
 ## Beyond Python
 
 Part of the argument is that the same rule shape works in other languages. Other ecosystems have their own built-in versions of some of these checks, which fits the point that sometimes a specialized tool is the answer. Any specific claim about another language's tooling needs checking before it goes in the post, and that proof can live outside this repo.
+
+## Checking a path outside the project
+
+`taskless check` given a path outside the project, or one that doesn't exist, reports success with no findings. `compare.sh` refuses those paths for now. Asked upstream whether that's intended: [taskless/cli#475](https://github.com/taskless/cli/issues/475).
