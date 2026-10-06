@@ -2,6 +2,10 @@ id: always-truthy-typeddict
 language: Python
 severity: warning
 message: "`$X` is a `$T`, a TypedDict with required keys, so it is never empty."
+note: |
+  A TypedDict with a required key can never be empty. Checks a TypedDict defined directly in
+  the same file. For inheritance and other files, see the runtime rule
+  `always-truthy-typeddict-inherited`.
 rule:
   all:
     - kind: identifier

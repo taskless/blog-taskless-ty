@@ -3,8 +3,8 @@ language: Python
 severity: warning
 message: "`self.$A` is annotated as a 1-element tuple, so this condition is always true. Did you mean `tuple[..., ...]`?"
 note: |
-  `tuple[int]` is a tuple of exactly one element, which is never empty. The usual intent
-  is `tuple[int, ...]`, a tuple of any length. Checks attributes annotated in the same class.
+  `tuple[int]` is a tuple of exactly one element, which is never empty. The usual intent is
+  `tuple[int, ...]`, a tuple of any length. Checks `self.<attr>` annotated in the same class.
 rule:
   all:
     - pattern: self.$A

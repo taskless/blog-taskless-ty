@@ -2,6 +2,10 @@ id: uncalled-function-in-condition
 language: Python
 severity: warning
 message: "`$F` is a function, so this condition is always true. Did you mean `$F()`?"
+note: |
+  A function object is always truthy, so `if f:` is true even when the author meant `if f():`.
+  Only functions defined at module level in the same file are checked. A parameter or local
+  assignment with the same name skips it. ty's `redundant-condition` reports the same thing.
 utils:
   # The slot a condition sits in. For `a if cond else b` that is the middle operand only;
   # the other two are values.

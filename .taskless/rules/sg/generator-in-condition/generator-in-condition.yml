@@ -2,6 +2,10 @@ id: generator-in-condition
 language: Python
 severity: warning
 message: "A generator expression is always true. Did you mean `any(...)` or `all(...)`?"
+note: |
+  A generator expression is always truthy, whether or not it would yield anything.
+  Wrap it in `any(...)` or `all(...)`. A generator assigned to a variable first (`gen = (...)`
+  then `if gen:`) is not caught. That needs dataflow.
 utils:
   # The slot a condition sits in. For `a if cond else b` that is the middle operand only;
   # the other two are values.

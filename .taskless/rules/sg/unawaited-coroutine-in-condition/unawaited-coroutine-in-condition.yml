@@ -2,6 +2,9 @@ id: unawaited-coroutine-in-condition
 language: Python
 severity: warning
 message: "`$F()` returns a coroutine, which is always true. Did you mean `await $F()`?"
+note: |
+  Calling an `async def` without `await` returns a coroutine, and a coroutine is always truthy.
+  Only async functions defined in the same file are checked.
 rule:
   all:
     - kind: call
