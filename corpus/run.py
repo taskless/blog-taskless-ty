@@ -19,6 +19,9 @@ CORPUS = ROOT / "corpus"
 REPOS = CORPUS / ".repos"
 RESULTS = CORPUS / "results"
 TASKLESS = ["npx", "-y", "@taskless/cli-nightly@0.12.0-20261006162512x92b3715"]
+# The runtime rule is hand-written, so the Taskless service never signed it, and a plain
+# `check` skips it. This flag runs its check.ts anyway. Read that file before you pass it.
+UNSIGNED = "--dangerously-run-scripts"
 TY_LINE = re.compile(r"^(?P<loc>[^:]+:\d+:\d+): \w+\[(?P<rule>redundant-condition[a-z-]*)\] (?P<msg>.*)$")
 
 
@@ -50,7 +53,7 @@ def checkout(name, url, sha):
 
 def run_taskless(name):
     proc = subprocess.run(
-        [*TASKLESS, "check", "--json", f"corpus/.repos/{name}"],
+        [*TASKLESS, "check", "--json", UNSIGNED, f"corpus/.repos/{name}"],
         cwd=ROOT, capture_output=True, text=True,
     )
     # One malformed rule stops ast-grep for every rule, and that reads as zero findings.

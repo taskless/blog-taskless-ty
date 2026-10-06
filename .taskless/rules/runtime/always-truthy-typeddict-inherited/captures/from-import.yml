@@ -1,0 +1,15 @@
+# Every `from module import ...` (including `as` aliases and relative imports).
+# check.ts uses these to resolve a class name to the file it came from, instead of
+# guessing by name across the whole repository.
+id: from-import
+language: Python
+rule:
+  kind: import_from_statement
+  has: { field: module_name, pattern: $M }
+metadata:
+  taskless:
+    version: 1
+    kind: runtime
+    name: from-import
+    check: check.ts
+    match: anchor

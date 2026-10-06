@@ -1,0 +1,49 @@
+# The narrow: a parameter annotated with a plain class name, tested for truthiness
+# in the same function (`if not x:`, `while x and y:`, `a if x else b`). It can't
+# know whether that class is a TypedDict, because the class may live in another
+# file and inherit from a third. check.ts decides that.
+id: truthiness-test
+language: Python
+utils:
+  condition-slot:
+    any:
+      - inside: { kind: if_statement, field: condition }
+      - inside: { kind: elif_clause, field: condition }
+      - inside: { kind: while_statement, field: condition }
+      - all:
+          - nthChild: 2
+          - inside: { kind: conditional_expression }
+  in-condition:
+    any:
+      - matches: condition-slot
+      - inside:
+          stopBy:
+            not:
+              any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          matches: condition-slot
+rule:
+  all:
+    - kind: identifier
+      pattern: $X
+    - matches: in-condition
+    - inside:
+        kind: function_definition
+        stopBy: end
+        has:
+          field: parameters
+          has:
+            kind: typed_parameter
+            all:
+              - has: { kind: identifier, pattern: $X }
+              - has: { field: type, kind: type, pattern: $T }
+constraints:
+  # A bare class name only. `Bar | None` and `Optional[Bar]` can be falsy.
+  T: { kind: type, regex: '^[A-Za-z_][A-Za-z0-9_]*$' }
+metadata:
+  taskless:
+    version: 1
+    kind: runtime
+    name: truthiness-test
+    check: check.ts
+    match: anchor

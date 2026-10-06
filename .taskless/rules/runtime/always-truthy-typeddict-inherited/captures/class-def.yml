@@ -1,0 +1,16 @@
+# Every class with a base list, in every file. check.ts builds its class index from
+# these, then walks the bases of whatever a truthiness test is annotated with.
+id: class-def
+language: Python
+rule:
+  kind: class_definition
+  all:
+    - has: { field: name, pattern: $N }
+    - has: { field: superclasses, kind: argument_list }
+metadata:
+  taskless:
+    version: 1
+    kind: runtime
+    name: class-def
+    check: check.ts
+    match: anchor

@@ -14,6 +14,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TASKLESS = ["npx", "-y", "@taskless/cli-nightly@0.12.0-20261006162512x92b3715"]
+# The runtime rule is hand-written, so the Taskless service never signed it, and a plain
+# `check` skips it. This flag runs its check.ts anyway. Read that file before you pass it.
+UNSIGNED = "--dangerously-run-scripts"
 TY_LINE = re.compile(r"^(?P<file>[^:]+):(?P<line>\d+):\d+: \w+\[(?P<rule>[a-z-]+)\]")
 
 
@@ -32,7 +35,7 @@ def run_ty(paths):
 
 def run_taskless(paths):
     out = subprocess.run(
-        [*TASKLESS, "check", "--json", *paths],
+        [*TASKLESS, "check", "--json", UNSIGNED, *paths],
         cwd=ROOT, capture_output=True, text=True,
     ).stdout
     hits = defaultdict(set)
