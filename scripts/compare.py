@@ -9,8 +9,9 @@ about that same line (see RUFF_SELECT in tools.py). A dash means the tool was si
 
 import sys
 from collections import defaultdict
+from pathlib import Path
 
-from tools import run_pylint, run_ruff, run_taskless, run_ty
+from tools import ROOT, run_pylint, run_ruff, run_taskless, run_ty
 
 TOOLS = {"ty": run_ty, "taskless": run_taskless, "pylint": run_pylint, "ruff": run_ruff}
 
@@ -24,6 +25,12 @@ def by_line(hits):
 
 def main():
     paths = sys.argv[1:] or ["examples"]
+    # taskless check only scans inside this project. Given a path outside it, it reports
+    # success with no findings, so the table would quietly show Taskless missing everything.
+    outside = [p for p in paths if not Path(p).resolve().is_relative_to(ROOT)]
+    if outside:
+        sys.exit(f"compare.sh only works on paths inside this repo: {', '.join(outside)}\n"
+                 "Copy the code under the repo (corpus/.repos/ is gitignored) and point at it there.")
     results = {name: by_line(run(paths)) for name, run in TOOLS.items()}
     rows = sorted(set(results["ty"]) | set(results["taskless"]) | set(results["pylint"]))
     if not rows:

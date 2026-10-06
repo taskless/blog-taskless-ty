@@ -5,6 +5,7 @@ Every runner takes paths relative to `cwd` and returns Hits with paths relative 
 """
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -85,5 +86,5 @@ def run_ruff(paths, cwd=ROOT):
                 "--select", RUFF_SELECT, "--ignore", RUFF_IGNORE, "--output-format", "json", *paths], cwd).stdout
     base = Path(cwd).resolve()
     # A finding with no code is a syntax error, e.g. black's deliberately invalid test data.
-    return [Hit(str(Path(r["filename"]).resolve().relative_to(base)), r["location"]["row"],
+    return [Hit(os.path.relpath(Path(r["filename"]).resolve(), base), r["location"]["row"],
                 r["location"]["column"], r["code"], r["message"]) for r in json.loads(out or "[]") if r["code"]]
