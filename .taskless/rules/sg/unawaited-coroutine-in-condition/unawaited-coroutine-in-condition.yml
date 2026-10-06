@@ -5,15 +5,34 @@ message: "`$F()` returns a coroutine, which is always true. Did you mean `await 
 note: |
   Calling an `async def` without `await` returns a coroutine, and a coroutine is always truthy.
   Only async functions defined in the same file are checked.
+utils:
+  # The slot a condition sits in. For `a if cond else b` that is the middle operand only;
+  # the other two are values.
+  condition-slot:
+    any:
+      - inside: { kind: if_statement, field: condition }
+      - inside: { kind: elif_clause, field: condition }
+      - inside: { kind: while_statement, field: condition }
+      - all:
+          - nthChild: 2
+          - inside: { kind: conditional_expression }
+  # A condition, or part of one through `and`/`or`/`not`/parens. `convert or default_fn`
+  # outside a condition is a fallback value, so the chain has to end in a condition slot.
+  in-condition:
+    any:
+      - matches: condition-slot
+      - inside:
+          stopBy:
+            not:
+              any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          matches: condition-slot
 rule:
   all:
     - kind: call
       has: { field: function, pattern: $F }
     - not: { inside: { kind: await } }
-    - any:
-        - inside: { kind: if_statement, field: condition }
-        - inside: { kind: elif_clause, field: condition }
-        - inside: { kind: while_statement, field: condition }
+    - matches: in-condition
     - inside:
         kind: module
         stopBy: end

@@ -6,13 +6,33 @@ note: |
   A TypedDict with a required key can never be empty. Checks a TypedDict defined directly in
   the same file. For inheritance and other files, see the runtime rule
   `always-truthy-typeddict-inherited`.
+utils:
+  # The slot a condition sits in. For `a if cond else b` that is the middle operand only;
+  # the other two are values.
+  condition-slot:
+    any:
+      - inside: { kind: if_statement, field: condition }
+      - inside: { kind: elif_clause, field: condition }
+      - inside: { kind: while_statement, field: condition }
+      - all:
+          - nthChild: 2
+          - inside: { kind: conditional_expression }
+  # A condition, or part of one through `and`/`or`/`not`/parens. `convert or default_fn`
+  # outside a condition is a fallback value, so the chain has to end in a condition slot.
+  in-condition:
+    any:
+      - matches: condition-slot
+      - inside:
+          stopBy:
+            not:
+              any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          matches: condition-slot
 rule:
   all:
     - kind: identifier
       pattern: $X
-    - any:
-        - inside: { kind: if_statement, field: condition }
-        - inside: { kind: not_operator }
+    - matches: in-condition
     - inside:
         kind: function_definition
         stopBy: end
@@ -31,5 +51,12 @@ rule:
           all:
             - has: { field: name, pattern: $T }
             - has: { field: superclasses, has: { any: [ { kind: identifier, regex: '^TypedDict$' }, { kind: attribute, regex: '^(typing|typing_extensions)\.TypedDict$' } ] } }
-            - not: { has: { field: superclasses, has: { kind: keyword_argument, regex: 'total\s*=\s*False' } } }
-            - has: { field: body, has: { kind: expression_statement, has: { kind: assignment, has: { field: type, kind: type } } } }
+            # At least one key is required. With the default `total=True` that's any key not
+            # wrapped in `NotRequired[...]`; with `total=False` it's a key wrapped in `Required[...]`.
+            - any:
+                - all:
+                    - not: { has: { field: superclasses, has: { kind: keyword_argument, regex: 'total\s*=\s*False' } } }
+                    - has: { field: body, has: { kind: expression_statement, has: { kind: assignment, has: { field: type, kind: type, not: { kind: type, regex: '^(\w+\.)*NotRequired\[' } } } } }
+                - all:
+                    - has: { field: superclasses, has: { kind: keyword_argument, regex: 'total\s*=\s*False' } }
+                    - has: { field: body, has: { kind: expression_statement, has: { kind: assignment, has: { field: type, kind: type, regex: '^(\w+\.)*Required\[' } } } }

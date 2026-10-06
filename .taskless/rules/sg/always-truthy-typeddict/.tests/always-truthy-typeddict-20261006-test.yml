@@ -11,6 +11,14 @@ valid:
     def f(d: dict):
         if not d:
             pass
+  - |
+    from typing import TypedDict
+    from typing_extensions import NotRequired
+    class Opt(TypedDict):
+        a: NotRequired[int]
+    def t(o: Opt):
+        if not o:
+            pass
 invalid:
   - |
     from typing import TypedDict
@@ -27,3 +35,21 @@ invalid:
     def f(d: D):
         if d:
             pass
+  - |
+    from typing import TypedDict
+    from typing_extensions import NotRequired
+    class D(TypedDict):
+        a: NotRequired[int]
+        b: str
+    def t(d: D):
+        if not d:
+            pass
+  - |
+    from typing import TypedDict
+    from typing_extensions import Required
+    class D(TypedDict, total=False):
+        a: int
+        b: Required[str]
+    def t(d: D):
+        while d:
+            break

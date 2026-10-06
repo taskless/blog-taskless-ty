@@ -13,6 +13,12 @@ valid:
     def f(c: int):
         if c:
             pass
+  - |
+    from enum import Enum
+    class C(Enum):
+        A = 1
+    def f(c: C):
+        return c or None
 invalid:
   - |
     from enum import Enum
@@ -28,3 +34,9 @@ invalid:
     def f(c: C):
         if not c:
             pass
+  - |
+    from enum import Enum
+    class C(Enum):
+        A = 1
+    def f(c: C):
+        return 1 if c else 2

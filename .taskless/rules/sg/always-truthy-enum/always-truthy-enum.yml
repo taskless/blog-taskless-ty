@@ -5,15 +5,33 @@ message: "`$X` is a `$T` member, and Enum members are always true."
 note: |
   Enum members are always truthy unless the Enum defines `__bool__` or `__len__`.
   Only Enums defined in the same file are checked.
+utils:
+  # The slot a condition sits in. For `a if cond else b` that is the middle operand only;
+  # the other two are values.
+  condition-slot:
+    any:
+      - inside: { kind: if_statement, field: condition }
+      - inside: { kind: elif_clause, field: condition }
+      - inside: { kind: while_statement, field: condition }
+      - all:
+          - nthChild: 2
+          - inside: { kind: conditional_expression }
+  # A condition, or part of one through `and`/`or`/`not`/parens. `convert or default_fn`
+  # outside a condition is a fallback value, so the chain has to end in a condition slot.
+  in-condition:
+    any:
+      - matches: condition-slot
+      - inside:
+          stopBy:
+            not:
+              any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          any: [ { kind: boolean_operator }, { kind: not_operator }, { kind: parenthesized_expression } ]
+          matches: condition-slot
 rule:
   all:
     - kind: identifier
       pattern: $X
-    - any:
-        - inside: { kind: if_statement, field: condition }
-        - inside: { kind: elif_clause, field: condition }
-        - inside: { kind: while_statement, field: condition }
-        - inside: { kind: not_operator }
+    - matches: in-condition
     - inside:
         kind: function_definition
         stopBy: end
