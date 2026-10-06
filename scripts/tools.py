@@ -12,7 +12,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TASKLESS = ["npx", "-y", "@taskless/cli-nightly@0.12.0-20261006162512x92b3715"]
+# The Taskless CLI version is pinned in package.json. `npm install` puts it here.
+TASKLESS_BIN = ROOT / "node_modules" / ".bin" / "taskless"
+TASKLESS = [str(TASKLESS_BIN)]
 # The runtime rule is hand-written, so the Taskless service never signed it, and a plain
 # `check` skips it. This flag runs its check.ts anyway. Read that file before you pass it.
 UNSIGNED = "--dangerously-run-scripts"
@@ -52,6 +54,8 @@ def run_ty(paths, cwd=ROOT, strict=True):
 
 
 def run_taskless(paths, cwd=ROOT):
+    if not TASKLESS_BIN.exists():
+        sys.exit("Taskless CLI not installed. Run `npm install` first.")
     proc = _run([*TASKLESS, "check", "--json", UNSIGNED, *paths], cwd)
     # One malformed rule stops ast-grep for every rule, and that reads as zero findings.
     # Refuse a scan that didn't run rather than report an empty result.

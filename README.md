@@ -4,10 +4,11 @@ On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status
 
 ## Run it
 
-You need [uv](https://docs.astral.sh/uv/) and Node.
+You need [uv](https://docs.astral.sh/uv/) and Node 22.22 or later.
 
 ```sh
 uv sync
+npm install
 scripts/compare.sh              # ty, Taskless, pylint and ruff over examples/, side by side
 scripts/compare.sh path/to/code # or over anything else
 ```
@@ -21,13 +22,12 @@ uv run corpus/run.py            # clones into corpus/.repos/, writes corpus/resu
 Run the rules' own tests:
 
 ```sh
-npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 test .taskless/rules/sg
-npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 test .taskless/rules/runtime --dangerously-run-scripts
+npm run test:rules
 ```
 
 Both scripts pass `--dangerously-run-scripts` to `taskless check`. The runtime rule below runs code, and Taskless only runs runtime rules its service signed. A rule written by hand never gets that signature, so without the flag `check` skips it. Read `check.ts` before you run it. That's what the flag is asking you to do.
 
-ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The rules use the per-rule directory layout from Taskless 0.12, so for now they need the nightly CLI.
+ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The Taskless CLI is pinned in `package.json`. The rules use the per-rule directory layout from Taskless 0.12, so for now that's the nightly build.
 
 ## Scorecard
 
