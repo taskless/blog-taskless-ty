@@ -22,7 +22,10 @@ Run the rules' own tests:
 
 ```sh
 npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 test .taskless/rules/sg
+npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 test .taskless/rules/runtime --dangerously-run-scripts
 ```
+
+Both scripts pass `--dangerously-run-scripts` to `taskless check`. The runtime rule below runs code, and Taskless only runs runtime rules its service signed. A rule written by hand never gets that signature, so without the flag `check` skips it. Read `check.ts` before you run it. That's what the flag is asking you to do.
 
 ty is pinned to 0.0.84. The rules use the per-rule directory layout from Taskless 0.12, so for now they need the nightly CLI.
 
@@ -38,10 +41,11 @@ Current output of `scripts/compare.sh` over `examples/`:
 | `if (x for x in xs):` | `generator-in-condition` | 3 of 4. Misses `gen = (...)` followed by `if gen:` |
 | `if self.x:` where `self.x: tuple[int]` | `single-element-tuple-in-condition` | Matches ty when the annotation is in the same class |
 | `if choice:` on an `Enum` | `always-truthy-enum` | Matches ty when the Enum is in the same file |
-| `if not x:` on a TypedDict with required keys | `always-truthy-typeddict` | Partial. Catches `class D(TypedDict)` and misses the thread's `Bar(Foo)`, because ast-grep can't follow inheritance |
+| `if not x:` on a TypedDict with required keys | `always-truthy-typeddict` (sg) | Catches `class D(TypedDict)` in the same file. Misses the thread's `Bar(Foo)`, because ast-grep can't follow inheritance |
+| same | `always-truthy-typeddict-inherited` (runtime) | Matches ty, including inheritance across files, `import ... as`, relative imports, `total=False`, `Required[]` and `NotRequired[]` |
 | `elif isinstance(x, str)` exhaustiveness | none | Needs union narrowing, which is a type checker's job. ty ships it off by default, and `pyproject.toml` turns it on here |
 
-Totals: ty 15, Taskless 12, both 12. Taskless flags nothing ty doesn't.
+Totals: ty 15, Taskless 13, both 13. Taskless flags nothing ty doesn't.
 
 ## Real codebases
 
@@ -71,15 +75,35 @@ Some checks are pure syntax. A generator expression in an `if` is always truthy,
 
 Some need same-file name resolution. ast-grep metavariables carry across `inside` and `has`, so a rule can say "this name is a function defined in this module." That covers most of the thread. Each edge case adds a clause, though: a parameter with the same name, a local assignment, a function used above its `def`.
 
-The rest is type inference: imports, inheritance chains, values flowing through variables, narrowing a union across branches. That's ty's real product. A Taskless runtime rule could reach some of it by reading other files, at the cost of rebuilding part of a type checker.
+Some need the rest of the repository. That's the TypedDict case, and it's what Taskless runtime rules are for (next section).
+
+The rest is type inference: values flowing through variables, narrowing a union across branches, calls that return a TypedDict. That's ty's real product, and nothing in this repo tries to rebuild it.
+
+## The runtime rule
+
+`.taskless/rules/runtime/always-truthy-typeddict-inherited/` handles the case the `sg` rule can't. In the thread's example, `x: Bar` is tested with `if not x:`, `Bar` subclasses `Foo`, and only `Foo` subclasses `TypedDict`. The answer depends on classes that can live in other files.
+
+A runtime rule splits the work in two:
+
+- **Captures** are ast-grep rules that do the cheap part across the whole repository. One finds a parameter annotated with a plain class name and tested for truthiness. One finds every class with a base list. One finds every `from module import ...`.
+- **`check.ts`** gets every match at once. It indexes the classes, resolves each name through the importing file's own imports (falling back to the same file), walks the bases up to `TypedDict`, and tracks which keys are required.
+
+When a name can't be resolved to exactly one class (a third-party base, a star import, two candidates), the check reports nothing. A wrong finding costs more trust than a missed one.
+
+Its fixtures are directories, because the evidence spans files: five that must fire (including one across two files and one through a relative `as` import) and five that must stay quiet (all keys optional, a same-named class in another module, an unresolvable third-party base). ty agrees with all ten.
+
+Over the corpus it reports nothing, the same as ty. To prove that zero meant "ran and found nothing", a planted two-file TypedDict inside Django's tree was caught in about 4 seconds, well inside the 10-second budget a check gets.
+
+It's still name resolution. `Payload = Order` as a type alias, a TypedDict built with the functional syntax, or a class reached through `import app.models` and used as `app.models.Order` all resolve to nothing, so they're silent misses rather than wrong answers.
 
 ## Layout
 
 ```
-examples/            thread code plus negative cases, one file per check
-.taskless/rules/sg/  one directory per rule, each with a .tests/ file
-pyproject.toml       pins ty
-scripts/compare.sh   the side-by-side table
-corpus/run.py        the real-codebase run; repos pinned in corpus/repos.txt
-corpus/results/      every finding from both tools, one per line
+examples/                 thread code plus negative cases, one file per check
+.taskless/rules/sg/       one directory per rule, each with a .tests/ file
+.taskless/rules/runtime/  the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
+pyproject.toml            pins ty
+scripts/compare.sh        the side-by-side table
+corpus/run.py             the real-codebase run; repos pinned in corpus/repos.txt
+corpus/results/           every finding from both tools, one per line
 ```
