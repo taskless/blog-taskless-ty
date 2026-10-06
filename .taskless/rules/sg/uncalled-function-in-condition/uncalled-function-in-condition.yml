@@ -38,10 +38,11 @@ rule:
               has: { field: name, pattern: $F }
             - kind: decorated_definition
               has: { kind: function_definition, has: { field: name, pattern: $F } }
+    # A parameter or local assignment with the same name shadows the module function.
     - not:
         inside:
           kind: function_definition
           stopBy: end
-          has:
-            field: parameters
-            has: { pattern: $F, stopBy: end }
+          any:
+            - has: { field: parameters, has: { pattern: $F, stopBy: end } }
+            - has: { field: body, has: { kind: assignment, has: { field: left, pattern: $F }, stopBy: end } }

@@ -8,8 +8,6 @@ black/tests/data/cases/typed_params_trailing_comma.py:16:42  single-element-tupl
 black/tests/data/cases/typed_params_trailing_comma.py:22:42  single-element-tuple-annotation
 black/tests/data/cases/typed_params_trailing_comma.py:3:42  single-element-tuple-annotation
 black/tests/data/cases/typed_params_trailing_comma.py:9:42  single-element-tuple-annotation
-django/django/template/defaultfilters.py:447:8  uncalled-function-in-condition
-django/django/template/defaulttags.py:78:12  uncalled-function-in-condition
 pydantic/pydantic/_internal/_model_construction.py:776:45  single-element-tuple-annotation
 pydantic/tests/test_edge_cases.py:292:39  single-element-tuple-annotation
 pydantic/tests/test_generics.py:2756:27  single-element-tuple-annotation

@@ -21,6 +21,12 @@ valid:
     def lam(): ...
     def g(convert=None):
         c = convert or lam
+  - |
+    def safe(): ...
+    def cut(v):
+        safe = isinstance(v, str)
+        if safe:
+            pass
 invalid:
   - |
     def cond(): ...
