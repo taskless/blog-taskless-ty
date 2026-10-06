@@ -1,0 +1,16 @@
+[project]
+name = "taskless-and-ty"
+version = "0.1.0"
+description = "ty's redundant-condition checks rebuilt as Taskless rules, side by side"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["ty==0.0.84"]
+
+[tool.uv]
+package = false
+
+[tool.ty.rules]
+# Off by default in ty. On here so the exhaustiveness example has a ty result to compare.
+redundant-condition-strict = "error"

@@ -1,0 +1,8 @@
+# name  url  commit
+# Pinned so the results in corpus/results/ reproduce exactly.
+django    https://github.com/django/django.git        8c34887b1ad8bb3ec61c6e713442dab3c643d557
+flask     https://github.com/pallets/flask.git        d73fa1cdcbd8b1465c151db8924ba58b1dd14e35
+httpx     https://github.com/encode/httpx.git         b5addb64f0161ff6bfe94c124ef76f6a1fba5254
+rich      https://github.com/Textualize/rich.git      9d8f9a372cc5916fd4781fec207ced7ddac2f08f
+black     https://github.com/psf/black.git            a3cb9e123ceab4f0fcab4980dd6c5f9439646794
+pydantic  https://github.com/pydantic/pydantic.git    d2cbaaab74ba4a26bb66f604199ec9793aab6177
