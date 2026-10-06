@@ -1,6 +1,6 @@
 # Real code is the test
 
-The first draft of the rules passed every one of its own tests. Run over six real codebases, it flagged 23 lines. One was a bug ty also reports. The other 22 were false positives.
+The first draft of the rules passed every one of its own tests. Run over six real codebases, it flagged 23 lines. One was a line ty also flags. The other 22 were false positives.
 
 Fixtures prove a rule does what its author imagined. A corpus proves what it does to code nobody wrote for it. Each fix below is its own commit, with the test case it added and the corpus lines it removed.
 
@@ -14,9 +14,9 @@ Fixtures prove a rule does what its author imagined. A corpus proves what it doe
 
 ## The two that are left
 
-One is real: `bar=a if foo else b` in black's test data, where `foo` is a function. ty flags the same line.
+One matches ty: `bar=a if foo else b` in black's formatter test data, where `foo` is a function. It's a fixture that never runs, so it's a true positive for the rule and a harmless one for black.
 
-The other is a false positive we kept on purpose. `foo` is used on line 18 of a file whose `def foo` is on line 70. At runtime that line raises `NameError` before the condition is ever tested. ty knows definition order, and ast-grep has no notion of it. ruff's F821 (undefined name) flags the same line, which confirms what's actually wrong there.
+The other is a false positive we kept on purpose. `foo` is used on line 18 of a file whose `def foo` is on line 70. The file is formatter test data and never runs, but if it did, `foo` would be undefined at that point. ty knows definition order, and ast-grep has no notion of it. ruff's F821 (undefined name) flags the same line, which confirms what's actually wrong there.
 
 ## The fix that came from a mistake
 
@@ -25,3 +25,13 @@ While making the second fix, a YAML error (a duplicated `any:` key) went into on
 Taskless had reported the failure (`"success": false`, with the parse error). The script wasn't reading it. Commit `79be20c` makes it stop instead of saving an empty result.
 
 A checker that reports zero when it didn't run is worse than one that crashes. The same idea drove how we tested the runtime rule (see [runtime-rule-lessons.md](runtime-rule-lessons.md)).
+
+## A second pair of eyes
+
+After all of that, a reviewer with no context checked out the repo and probed the rules with variants the fixtures didn't cover. It found three gaps in a few minutes:
+
+- `unawaited-coroutine-in-condition` missed `if not co():` and `if co() and x:`, because it only matched a bare `if` condition.
+- `always-truthy-enum` missed `1 if c else 2` for the same reason.
+- `always-truthy-typeddict` flagged a TypedDict whose keys were all `NotRequired`, which can be empty. ty stayed quiet.
+
+The fixtures had been written by the same person as the rules, so they shared the rules' blind spots. All three are fixed, with the reviewer's cases added as tests, and the corpus results didn't move.

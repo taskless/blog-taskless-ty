@@ -1,25 +1,26 @@
 # The checks, by what they need
 
-The thread shows six checks across seven screenshots. Sorting them by what a tool needs to know made the line between a rule and a type checker clear. Each tier costs more than the last.
+The thread shows six checks across seven screenshots: an uncalled function, the same with an `async def`, a generator, a TypedDict, a 1-element tuple, an Enum, and `isinstance` exhaustiveness. The uncalled sync and async functions are one check. Sorting them by what a tool needs to know made the line between a rule and a type checker clear. Each tier costs more than the last.
 
 ## Syntax only
 
-A generator expression in a condition, like `if (x > 42 for x in items):`, is always true, because a generator object is truthy whether or not it would yield anything. Nothing needs resolving, so the `sg` rule is as accurate as ty here.
+A generator expression in a condition, like `if (x > 42 for x in items):`, is always true, because a generator object is truthy whether or not it would yield anything. Nothing needs resolving, so the `sg` rule matches ty on every direct use.
 
 It misses `gen = (...)` followed by `if gen:`. Catching that means tracking what `gen` holds, which is dataflow. pylint catches it.
 
 ## The same file
 
-Four of the checks need to know what a name refers to, and in the thread's examples the answer is in the same file:
+Three of the checks need to know what a name refers to, and in the thread's examples the answer is in the same file:
 
-- an uncalled function, `if condition:` where `def condition()` is in the module
-- a forgotten `await`, `if f():` where `f` is `async def`
+- an uncalled function, `if condition:` where `def condition()` (or `async def`) is in the module
 - an always-truthy Enum, `if choice:` where `choice: Choice` and `Choice(Enum)` defines no `__bool__` or `__len__`
 - a 1-element tuple, `if self.x:` where `self.x: tuple[int]`, which ty answers with "Did you mean `tuple[int, ...]`?"
 
+ty also flags a forgotten `await` (`if f():` where `f` is `async def`), which isn't in the thread. We added a rule for it in the same tier.
+
 ast-grep handles these because a metavariable bound in one part of a rule has to match the same text everywhere else it's used. A rule can say "`$F` in this condition, and a `def $F` at module level," and that covers every example in the thread.
 
-Each edge case adds a clause, though: a parameter with the same name, a local assignment with the same name, a function used above its `def`. Writing those clauses is building scope resolution by hand, and it's where the false positives came from (see [real-code-is-the-test.md](real-code-is-the-test.md)).
+Each edge case adds a clause, though: a parameter with the same name, a local assignment with the same name. A function used above its `def` would need a third, and that one we left as a known false positive. Writing those clauses is building scope resolution by hand, and it's where the false positives came from (see [real-code-is-the-test.md](real-code-is-the-test.md)).
 
 ## The whole repository
 

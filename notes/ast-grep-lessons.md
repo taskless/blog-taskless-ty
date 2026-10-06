@@ -12,7 +12,7 @@ In tree-sitter-python, `tuple[int]` inside an annotation is a `generic_type` wit
 
 ## One YAML mapping can't hold two `any:` keys
 
-It's an easy mistake when nesting conditions, and it doesn't fail on its own. It takes down every rule in the scan. Moving the shared logic into `utils:` and referring to it with `matches:` avoided the duplicate and let two rules share it.
+It's an easy mistake when nesting conditions. ast-grep does reject it with a clear error ("duplicate field `any`"), but it rejects the whole config, so every other rule in the scan stops too. Moving the shared logic into `utils:` and referring to it with `matches:` avoided the duplicate and let two rules share it.
 
 ## A relational rule needs a positive matcher
 

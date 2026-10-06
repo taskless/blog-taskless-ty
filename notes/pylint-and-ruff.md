@@ -19,15 +19,17 @@ Across the corpus it flags 93 lines, 4 of them lines ty flags too:
 
 pylint does support custom checkers, written in Python against its AST library (astroid). So pylint can go further than W0125. Someone has to write and maintain that checker.
 
-Two practical notes from running it: pylint reports syntax errors and unknown-option warnings even with every check disabled, so the scripts keep only W0125. It also reads a project's own `pylintrc`, so the scripts point it at an empty one. It's the slowest of the four tools here, most of the roughly 2 minutes a full corpus run takes.
+Two practical notes from running it: pylint reports syntax errors and unknown-option warnings even with every check disabled, so the scripts keep only W0125. It also reads a project's own `pylintrc`, so the scripts point it at an empty one. It's the slowest of the four tools here, about 2 of the roughly 2.5 minutes a full corpus run takes.
 
 ## ruff
 
 Ruff can't take a custom rule. Its [FAQ](https://docs.astral.sh/ruff/faq/) says it "implements all rules natively and does not support custom or third-party rules." A plugin system is described as "within-scope", but it doesn't exist yet. Ruff also never ported pylint's W0125.
 
+It does have rules for a few other always-true shapes: `F634` (`if (a, b):`, a tuple is always true), `F631` (the same in an `assert`), `SIM222`/`SIM223` (`x or True`, `x and False`), and `PLW0129` (asserting on an empty string). None of them covers a case from the thread.
+
 To be sure nothing in ruff covers this anyway, the scripts run its correctness families (`F`, `B`, `PLE`, `PLW`, `RUF`, `ASYNC`) with preview rules on, and report anything they say about the lines the other tools flag.
 
 - On the examples, nothing. The only ruff finding on those lines was RUF050 ("empty `if`"), which fires because the examples use `pass` bodies, so it's ignored.
-- Across the corpus, 38 findings on flagged lines, none about the condition. Most are mutable default arguments (B006) and useless expressions (B018) on pylint's literal-constant lines. One is useful: F821 flags `foo` as undefined on the line our rule wrongly flags (see [real-code-is-the-test.md](real-code-is-the-test.md)).
+- Across the corpus, 38 findings on flagged lines. Four are RUF034, a ternary whose two branches are identical, which is about the conditional but not about whether the condition is constant. Most of the rest are mutable default arguments (B006) and useless expressions (B018) on pylint's literal-constant lines. One is useful: F821 flags `foo` as undefined on the line our rule wrongly flags (see [real-code-is-the-test.md](real-code-is-the-test.md)).
 
-For a ruff user, "write a rule" means "turn on a rule that exists." For this class of bug, none does.
+For a ruff user, "write a rule" means "turn on a rule that exists." For the thread's checks, none does.
