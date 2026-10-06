@@ -1,0 +1,35 @@
+id: single-element-tuple-in-condition
+language: Python
+severity: warning
+message: "`self.$A` is annotated as a 1-element tuple, so this condition is always true. Did you mean `tuple[..., ...]`?"
+note: |
+  `tuple[int]` is a tuple of exactly one element, which is never empty. The usual intent
+  is `tuple[int, ...]`, a tuple of any length. Checks attributes annotated in the same class.
+rule:
+  all:
+    - pattern: self.$A
+    - any:
+        - inside: { kind: if_statement, field: condition }
+        - inside: { kind: elif_clause, field: condition }
+        - inside: { kind: while_statement, field: condition }
+        - inside: { kind: not_operator }
+    - inside:
+        kind: class_definition
+        stopBy: end
+        has:
+          stopBy: end
+          kind: assignment
+          all:
+            - has: { field: left, pattern: self.$A }
+            - has:
+                field: type
+                kind: type
+                has:
+                  kind: generic_type
+                  all:
+                    - has: { kind: identifier, regex: '^(tuple|Tuple)$' }
+                    - has:
+                        kind: type_parameter
+                        all:
+                          - has: { kind: type, nthChild: 1, not: { regex: '^Unpack\[|^\*', kind: type } }
+                          - not: { has: { kind: type, nthChild: 2 } }

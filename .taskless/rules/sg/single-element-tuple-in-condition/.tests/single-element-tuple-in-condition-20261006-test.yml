@@ -1,0 +1,31 @@
+id: single-element-tuple-in-condition
+valid:
+  - |
+    class Foo:
+        def __init__(self):
+            self.x: tuple[int, ...] = (42,)
+        def m(self):
+            if self.x:
+                pass
+  - |
+    class Foo:
+        def __init__(self):
+            self.x: tuple[int] = (42,)
+        def m(self):
+            return self.x[0]
+invalid:
+  - |
+    class Foo:
+        def __init__(self):
+            self.x: tuple[int] = (42,)
+        def method(self) -> None:
+            if self.x:
+                print("tuple is empty")
+  - |
+    from typing import Tuple
+    class Foo:
+        def __init__(self):
+            self.x: Tuple[str] = ("a",)
+        def method(self) -> None:
+            if not self.x:
+                pass
