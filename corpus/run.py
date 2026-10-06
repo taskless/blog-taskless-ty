@@ -49,13 +49,18 @@ def checkout(name, url, sha):
 
 
 def run_taskless(name):
-    out = subprocess.run(
+    proc = subprocess.run(
         [*TASKLESS, "check", "--json", f"corpus/.repos/{name}"],
         cwd=ROOT, capture_output=True, text=True,
-    ).stdout
+    )
+    # One malformed rule stops ast-grep for every rule, and that reads as zero findings.
+    # Refuse to record a scan that didn't run, rather than saving an empty result.
+    report = json.loads(proc.stdout or "{}")
+    if not report.get("success"):
+        sys.exit(f"taskless check failed on {name}:\n{proc.stdout or proc.stderr}")
     prefix = f"corpus/.repos/{name}/"
     rows = []
-    for r in json.loads(out).get("results", []):
+    for r in report.get("results", []):
         start = r["range"]["start"]
         path = r["file"].removeprefix(prefix)
         rows.append(f"{name}/{path}:{start['line'] + 1}:{start['column'] + 1}  {r['ruleId']}")
