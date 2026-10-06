@@ -25,6 +25,8 @@ Run the rules' own tests:
 npm run test:rules
 ```
 
+CI (`.github/workflows/check.yml`) runs those tests and `compare.sh` on every push, and fails if the side-by-side table differs from `examples/compare.expected.txt`.
+
 Both scripts pass `--dangerously-run-scripts` to `taskless check`. The runtime rule below runs code, and Taskless only runs runtime rules its service signed. A rule written by hand never gets that signature, so without the flag `check` skips it. Read `check.ts` before you run it. That's what the flag is asking you to do.
 
 ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The Taskless CLI is pinned in `package.json`. The rules use the per-rule directory layout from Taskless 0.12, so for now that's the nightly build.
@@ -111,12 +113,13 @@ It's still name resolution. `Payload = Order` as a type alias, a TypedDict built
 ## Layout
 
 ```
-examples/                 thread code plus negative cases, one file per check
-.taskless/rules/sg/       one directory per rule, each with a .tests/ file
-.taskless/rules/runtime/  the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
-pyproject.toml            pins ty
-scripts/compare.sh        the side-by-side table
-scripts/tools.py          how each of the four tools is run, shared by both scripts
-corpus/run.py             the real-codebase run; repos pinned in corpus/repos.txt
-corpus/results/           every finding from both tools, one per line
+examples/                      thread code plus negative cases, one file per check
+.taskless/rules/sg/            one directory per rule, each with a .tests/ file
+.taskless/rules/runtime/       the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
+pyproject.toml                 pins ty
+scripts/compare.sh             the side-by-side table
+scripts/tools.py               how each of the four tools is run, shared by both scripts
+examples/compare.expected.txt  the table CI expects compare.sh to print
+corpus/run.py                  the real-codebase run; repos pinned in corpus/repos.txt
+corpus/results/                every finding from both tools, one per line
 ```

@@ -1,0 +1,22 @@
+location                               ty                          taskless                                                    pylint               ruff
+-------------------------------------  --------------------------  ----------------------------------------------------------  -------------------  ----
+examples/exhaustive_branches.py:4      redundant-condition-strict  -                                                           -                    -   
+examples/single_element_tuple.py:6     redundant-condition         single-element-tuple-in-condition                           -                    -   
+examples/truthy_enum.py:14             redundant-condition         always-truthy-enum                                          -                    -   
+examples/truthy_generator.py:2         redundant-condition         generator-in-condition                                      using-constant-test  -   
+examples/truthy_generator.py:7         redundant-condition         -                                                           using-constant-test  -   
+examples/truthy_generator.py:9         redundant-condition         generator-in-condition                                      -                    -   
+examples/truthy_generator.py:11        redundant-condition         generator-in-condition                                      -                    -   
+examples/truthy_typed_dict.py:17       redundant-condition         always-truthy-typeddict-inherited                           -                    -   
+examples/truthy_typed_dict.py:27       redundant-condition         always-truthy-typeddict, always-truthy-typeddict-inherited  -                    -   
+examples/uncalled_async_function.py:4  redundant-condition         uncalled-function-in-condition                              using-constant-test  -   
+examples/uncalled_async_function.py:7  redundant-condition         unawaited-coroutine-in-condition                            -                    -   
+examples/uncalled_function.py:3        redundant-condition         uncalled-function-in-condition                              using-constant-test  -   
+examples/uncalled_function.py:18       redundant-condition         uncalled-function-in-condition                              -                    -   
+examples/uncalled_function.py:20       redundant-condition         uncalled-function-in-condition                              using-constant-test  -   
+examples/uncalled_function.py:21       redundant-condition         uncalled-function-in-condition                              -                    -   
+
+ty         15 lines    15 of ty's 15
+taskless   13 lines    13 of ty's 15
+pylint      5 lines     5 of ty's 15
+ruff        0 lines     0 of ty's 15

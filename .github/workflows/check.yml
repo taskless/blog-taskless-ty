@@ -1,0 +1,37 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: astral-sh/setup-uv@v10
+
+      - name: Install
+        run: |
+          npm ci
+          uv sync
+
+      # Every rule's own fixtures. The runtime rule is hand-written and unsigned, so its
+      # check.ts only runs under --dangerously-run-scripts (see package.json).
+      - name: Rule tests
+        run: npm run test:rules
+
+      # ty, Taskless, pylint and ruff over examples/. A rule or tool change that moves
+      # any row fails here; regenerate the snapshot with
+      #   scripts/compare.sh > examples/compare.expected.txt
+      - name: Side-by-side matches the snapshot
+        run: |
+          scripts/compare.sh > compare.actual.txt
+          diff -u examples/compare.expected.txt compare.actual.txt
