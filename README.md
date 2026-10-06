@@ -116,10 +116,11 @@ It's still name resolution. `Payload = Order` as a type alias, a TypedDict built
 examples/                      thread code plus negative cases, one file per check
 .taskless/rules/sg/            one directory per rule, each with a .tests/ file
 .taskless/rules/runtime/       the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
-pyproject.toml                 pins ty
+pyproject.toml                 pins ty, pylint and ruff
+package.json                   pins the Taskless CLI
 scripts/compare.sh             the side-by-side table
 scripts/tools.py               how each of the four tools is run, shared by both scripts
 examples/compare.expected.txt  the table CI expects compare.sh to print
 corpus/run.py                  the real-codebase run; repos pinned in corpus/repos.txt
-corpus/results/                every finding from both tools, one per line
+corpus/results/                each tool's findings, one per line
 ```
