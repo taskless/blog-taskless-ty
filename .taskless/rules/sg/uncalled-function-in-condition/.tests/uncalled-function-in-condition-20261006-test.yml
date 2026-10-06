@@ -13,6 +13,10 @@ valid:
     x = 1
     if x:
         pass
+  - |
+    def a(): ...
+    def b(): ...
+    f = a if flag else b
 invalid:
   - |
     def cond(): ...
@@ -27,3 +31,6 @@ invalid:
     def cond(): ...
     while cond:
         break
+  - |
+    def cond(): ...
+    x = 1 if cond else 2

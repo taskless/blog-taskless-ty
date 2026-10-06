@@ -9,5 +9,8 @@ rule:
     - inside: { kind: elif_clause, field: condition }
     - inside: { kind: while_statement, field: condition }
     - inside: { kind: assert_statement }
-    - inside: { kind: conditional_expression }
+    - all:
+        # The middle of `a if cond else b`. The other two are values, not conditions.
+        - nthChild: 2
+        - inside: { kind: conditional_expression }
     - inside: { kind: not_operator }

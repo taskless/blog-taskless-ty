@@ -8,6 +8,9 @@ valid:
     def f(xs):
         if [x for x in xs]:
             pass
+  - |
+    def f(xs, all_rows):
+        rows = all_rows if xs is None else (r for r in xs)
 invalid:
   - |
     def f(xs):
