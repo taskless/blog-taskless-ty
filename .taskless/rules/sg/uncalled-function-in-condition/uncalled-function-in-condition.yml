@@ -1,0 +1,31 @@
+id: uncalled-function-in-condition
+language: Python
+severity: warning
+message: "`$F` is a function, so this condition is always true. Did you mean `$F()`?"
+rule:
+  all:
+    - kind: identifier
+      pattern: $F
+    - any:
+        - inside: { kind: if_statement, field: condition }
+        - inside: { kind: elif_clause, field: condition }
+        - inside: { kind: while_statement, field: condition }
+        - inside: { kind: conditional_expression }
+        - inside:
+            any: [ { kind: boolean_operator }, { kind: not_operator } ]
+    - inside:
+        kind: module
+        stopBy: end
+        has:
+          any:
+            - kind: function_definition
+              has: { field: name, pattern: $F }
+            - kind: decorated_definition
+              has: { kind: function_definition, has: { field: name, pattern: $F } }
+    - not:
+        inside:
+          kind: function_definition
+          stopBy: end
+          has:
+            field: parameters
+            has: { pattern: $F, stopBy: end }

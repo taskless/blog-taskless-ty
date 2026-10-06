@@ -1,0 +1,22 @@
+id: unawaited-coroutine-in-condition
+valid:
+  - |
+    async def f(): ...
+    async def g():
+        if await f():
+            pass
+  - |
+    def f(): ...
+    if f():
+        pass
+invalid:
+  - |
+    async def f(): ...
+    async def g():
+        if f():
+            pass
+  - |
+    async def f(): ...
+    async def g():
+        while f():
+            break

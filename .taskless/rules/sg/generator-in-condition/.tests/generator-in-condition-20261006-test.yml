@@ -1,0 +1,18 @@
+id: generator-in-condition
+valid:
+  - |
+    def f(xs):
+        if any(x > 1 for x in xs):
+            pass
+  - |
+    def f(xs):
+        if [x for x in xs]:
+            pass
+invalid:
+  - |
+    def f(xs):
+        if (x > 1 for x in xs):
+            pass
+  - |
+    def f(xs):
+        assert (x for x in xs)

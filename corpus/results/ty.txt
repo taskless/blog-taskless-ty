@@ -1,0 +1,28 @@
+black/tests/data/cases/conditional_expression.py:115:14  redundant-condition  Function `foo` is always truthy: Did you mean to call this function?
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:13:14  redundant-condition  Expression `...` is always truthy (has type `EllipsisType`)
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:5:14  redundant-condition  Expression `...` is always truthy (has type `EllipsisType`)
+black/tests/data/cases/pattern_matching_with_if_stmt.py:11:18  redundant-condition  Expression `"any long condition" != "another long condition" and "this is a looooong condition"` is always truthy (has type `Literal["this is a looooong condition"]`)
+black/tests/data/cases/pattern_matching_with_if_stmt.py:43:62  redundant-condition  String literal "this is a long condition" is always truthy
+black/tests/data/cases/pattern_matching_with_if_stmt.py:48:13  redundant-condition  String literal "this is a looooong condition" is always truthy
+black/tests/data/cases/pattern_matching_with_if_stmt.py:52:9  redundant-condition  Nonempty string of type `Literal["this is a looooong condition"]` is always truthy
+black/tests/data/cases/pattern_matching_with_if_stmt.py:7:73  redundant-condition  String literal "this is a long condition" is always truthy
+black/tests/data/cases/pattern_matching_with_if_stmt.py:9:71  redundant-condition  String literal "this is a looooong condition" is always truthy
+black/tests/data/cases/type_aliases.py:20:23  redundant-condition  Object of type `TypeVar` is always truthy
+black/tests/data/cases/type_aliases.py:7:21  redundant-condition  Object of type `TypeVar` is always truthy
+django/django/contrib/admin/options.py:1274:13  redundant-condition  Expression `self.list_display_links` is always falsy (has type `tuple[()]`)
+django/django/contrib/admin/options.py:2738:12  redundant-condition  Expression `self.filter_vertical` is always falsy (has type `tuple[()]`)
+django/django/contrib/admin/options.py:2738:36  redundant-condition  Expression `self.filter_horizontal` is always falsy (has type `tuple[()]`)
+django/django/contrib/gis/db/models/functions.py:74:16  redundant-condition  Expression `self.geom_param_pos` is always truthy (has type `tuple[int]`)
+django/django/db/models/query.py:2330:12  redundant-condition  Expression `self._prefetch_related_lookups` is always falsy (has type `tuple[()]`)
+django/django/db/models/query.py:2530:12  redundant-condition  Expression `self._prefetch_related_lookups` is always falsy (has type `tuple[()]`)
+django/django/db/models/query.py:600:16  redundant-condition  Expression `self._prefetch_related_lookups` is always falsy (has type `tuple[()]`)
+django/django/db/models/query.py:616:16  redundant-condition  Object of type `tuple[()]` is always falsy
+django/django/db/models/query.py:634:16  redundant-condition  Object of type `tuple[()]` is always falsy
+django/django/db/models/query.py:660:16  redundant-condition  Object of type `tuple[()]` is always falsy
+django/django/db/models/sql/query.py:406:12  redundant-condition  Object of type `tuple[()]` is always falsy
+flask/src/flask/json/provider.py:115:8  redundant-condition  Variable `dataclasses` is always truthy (has type `<module 'dataclasses'>`)
+pydantic/pydantic-core/tests/validators/test_string.py:245:42  redundant-condition  String literal 'ABC' is always truthy
+pydantic/tests/benchmarks/test_imports.py:19:16  redundant-condition  Function `Field` is always truthy: Did you mean to call this function?
+pydantic/tests/test_utils.py:405:32  redundant-condition  Object of type `<special-form 'typing.Annotated'>` is always truthy
+pydantic/tests/test_validate_call.py:1081:12  redundant-condition  Function `bar` is always truthy: Did you mean to call this function?
+rich/rich/text.py:1243:16  redundant-condition  Nonempty string `wrap_justify` is always truthy (has type `Literal["default", "left", "center", "right", "full"]`)

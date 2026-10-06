@@ -1,0 +1,30 @@
+id: always-truthy-enum
+valid:
+  - |
+    from enum import Enum
+    class C(Enum):
+        A = 0
+        def __bool__(self):
+            return bool(self.value)
+    def f(c: C):
+        if c:
+            pass
+  - |
+    def f(c: int):
+        if c:
+            pass
+invalid:
+  - |
+    from enum import Enum
+    class C(Enum):
+        A = 1
+    def f(c: C):
+        if c:
+            pass
+  - |
+    import enum
+    class C(enum.Enum):
+        A = 1
+    def f(c: C):
+        if not c:
+            pass

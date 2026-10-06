@@ -1,0 +1,13 @@
+id: generator-in-condition
+language: Python
+severity: warning
+message: "A generator expression is always true. Did you mean `any(...)` or `all(...)`?"
+rule:
+  kind: generator_expression
+  any:
+    - inside: { kind: if_statement, field: condition }
+    - inside: { kind: elif_clause, field: condition }
+    - inside: { kind: while_statement, field: condition }
+    - inside: { kind: assert_statement }
+    - inside: { kind: conditional_expression }
+    - inside: { kind: not_operator }

@@ -1,0 +1,29 @@
+id: always-truthy-typeddict
+valid:
+  - |
+    from typing import TypedDict
+    class D(TypedDict, total=False):
+        a: int
+    def f(d: D):
+        if not d:
+            pass
+  - |
+    def f(d: dict):
+        if not d:
+            pass
+invalid:
+  - |
+    from typing import TypedDict
+    class D(TypedDict):
+        a: int
+    def f(d: D):
+        if not d:
+            pass
+  - |
+    from typing import TypedDict
+    class D(TypedDict):
+        a: int
+        b: str
+    def f(d: D):
+        if d:
+            pass

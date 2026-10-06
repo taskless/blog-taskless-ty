@@ -1,0 +1,31 @@
+id: always-truthy-typeddict
+language: Python
+severity: warning
+message: "`$X` is a `$T`, a TypedDict with required keys, so it is never empty."
+rule:
+  all:
+    - kind: identifier
+      pattern: $X
+    - any:
+        - inside: { kind: if_statement, field: condition }
+        - inside: { kind: not_operator }
+    - inside:
+        kind: function_definition
+        stopBy: end
+        has:
+          field: parameters
+          has:
+            kind: typed_parameter
+            all:
+              - has: { pattern: $X }
+              - has: { field: type, pattern: $T }
+    - inside:
+        kind: module
+        stopBy: end
+        has:
+          kind: class_definition
+          all:
+            - has: { field: name, pattern: $T }
+            - has: { field: superclasses, has: { any: [ { kind: identifier, regex: '^TypedDict$' }, { kind: attribute, regex: '^(typing|typing_extensions)\.TypedDict$' } ] } }
+            - not: { has: { field: superclasses, has: { kind: keyword_argument, regex: 'total\s*=\s*False' } } }
+            - has: { field: body, has: { kind: expression_statement, has: { kind: assignment, has: { field: type, kind: type } } } }

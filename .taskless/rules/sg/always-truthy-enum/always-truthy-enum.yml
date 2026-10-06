@@ -1,0 +1,32 @@
+id: always-truthy-enum
+language: Python
+severity: warning
+message: "`$X` is a `$T` member, and Enum members are always true."
+rule:
+  all:
+    - kind: identifier
+      pattern: $X
+    - any:
+        - inside: { kind: if_statement, field: condition }
+        - inside: { kind: elif_clause, field: condition }
+        - inside: { kind: while_statement, field: condition }
+        - inside: { kind: not_operator }
+    - inside:
+        kind: function_definition
+        stopBy: end
+        has:
+          field: parameters
+          has:
+            kind: typed_parameter
+            all:
+              - has: { pattern: $X }
+              - has: { field: type, pattern: $T }
+    - inside:
+        kind: module
+        stopBy: end
+        has:
+          kind: class_definition
+          all:
+            - has: { field: name, pattern: $T }
+            - has: { field: superclasses, has: { any: [ { kind: identifier, regex: '^Enum$' }, { kind: attribute, regex: '^enum\.Enum$' } ] } }
+            - not: { has: { field: body, stopBy: end, kind: function_definition, has: { field: name, kind: identifier, regex: '^__(bool|len)__$' } } }

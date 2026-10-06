@@ -1,0 +1,20 @@
+id: unawaited-coroutine-in-condition
+language: Python
+severity: warning
+message: "`$F()` returns a coroutine, which is always true. Did you mean `await $F()`?"
+rule:
+  all:
+    - kind: call
+      has: { field: function, pattern: $F }
+    - not: { inside: { kind: await } }
+    - any:
+        - inside: { kind: if_statement, field: condition }
+        - inside: { kind: elif_clause, field: condition }
+        - inside: { kind: while_statement, field: condition }
+    - inside:
+        kind: module
+        stopBy: end
+        has:
+          kind: function_definition
+          regex: '^async\s+def'
+          has: { field: name, pattern: $F }

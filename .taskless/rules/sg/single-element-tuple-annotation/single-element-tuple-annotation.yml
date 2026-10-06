@@ -1,0 +1,15 @@
+id: single-element-tuple-annotation
+language: Python
+severity: warning
+message: "`$N[$T]` means a tuple of exactly one element. Did you mean `$N[$T, ...]`?"
+rule:
+  kind: generic_type
+  all:
+    - has: { kind: identifier, regex: '^(tuple|Tuple)$', pattern: $N }
+    - has:
+        kind: type_parameter
+        all:
+          - has: { kind: type, nthChild: 1, pattern: $T }
+          - not: { has: { kind: type, nthChild: 2 } }
+          - not: { kind: type_parameter, regex: '^\[\s*\(\s*\)\s*\]$' }
+fix: $N[$T, ...]

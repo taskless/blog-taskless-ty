@@ -1,0 +1,29 @@
+id: uncalled-function-in-condition
+valid:
+  - |
+    def cond(): ...
+    if cond():
+        pass
+  - |
+    def cond(): ...
+    def h(cond):
+        if cond:
+            pass
+  - |
+    x = 1
+    if x:
+        pass
+invalid:
+  - |
+    def cond(): ...
+    if cond:
+        pass
+  - |
+    async def f(): ...
+    async def g():
+        if f:
+            pass
+  - |
+    def cond(): ...
+    while cond:
+        break
