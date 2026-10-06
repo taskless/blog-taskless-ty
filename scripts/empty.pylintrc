@@ -1,0 +1,2 @@
+# Deliberately empty: compare runs ignore any pylintrc in the scanned project.
+[MAIN]

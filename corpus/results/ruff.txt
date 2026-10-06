@@ -1,0 +1,38 @@
+black/tests/data/cases/conditional_expression.py:115:23  F821  Undefined name `b`
+black/tests/data/cases/conditional_expression.py:18:8  F821  Undefined name `foo`
+black/tests/data/cases/conditional_expression.py:202:9  RUF034  Useless `if`-`else` condition
+black/tests/data/cases/conditional_expression.py:87:9  RUF034  Useless `if`-`else` condition
+black/tests/data/cases/expression.py:305:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:306:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:307:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:308:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:309:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:43:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:44:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:45:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:46:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/expression.py:47:1  B018  Found useless expression. Either assign it to a variable or remove it.
+black/tests/data/cases/fmtonoff.py:286:25  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/fmtonoff.py:286:31  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/fmtonoff.py:286:5  F811  Redefinition of unused `spaces` from line 41: `spaces` redefined here
+black/tests/data/cases/fmtonoff.py:41:25  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/fmtonoff.py:41:31  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/fmtonoff.py:44:55  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/fmtonoff.py:44:69  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:146:25  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:146:31  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:146:5  F811  Redefinition of unused `spaces` from line 31: `spaces` redefined here
+black/tests/data/cases/function.py:31:25  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:31:31  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:34:55  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/function.py:34:69  B006  Do not use mutable data structures for argument defaults
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:13:23  F821  Undefined name `m`
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:13:30  F821  Undefined name `s`
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:5:23  F821  Undefined name `m`
+black/tests/data/cases/is_simple_lookup_for_doublestar_expression.py:5:30  F821  Undefined name `s`
+black/tests/data/cases/remove_except_types_parens_pre_py314.py:202:8  B030  `except` handlers should only be exception classes or tuples of exception classes
+black/tests/data/cases/remove_except_types_parens_pre_py314.py:207:9  B030  `except*` handlers should only be exception classes or tuples of exception classes
+black/tests/data/cases/remove_except_types_parens_pre_py314.py:89:9  B030  `except` handlers should only be exception classes or tuples of exception classes
+black/tests/data/cases/remove_except_types_parens_pre_py314.py:94:10  B030  `except*` handlers should only be exception classes or tuples of exception classes
+black/tests/data/cases/type_aliases.py:20:18  RUF034  Useless `if`-`else` condition
+black/tests/data/cases/type_aliases.py:7:16  RUF034  Useless `if`-`else` condition

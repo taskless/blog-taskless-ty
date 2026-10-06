@@ -6,7 +6,11 @@ requires-python = ">=3.12"
 dependencies = []
 
 [dependency-groups]
-dev = ["ty==0.0.84"]
+dev = [
+    "pylint==4.1.2",
+    "ruff==0.16.10",
+    "ty==0.0.84",
+]
 
 [tool.uv]
 package = false

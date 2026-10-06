@@ -1,28 +1,30 @@
-"""Run ty and the Taskless rules over real codebases and save what each one flags.
+"""Run ty, the Taskless rules, pylint and ruff over real codebases and save what each flags.
 
-Usage: uv run corpus/run.py [--skip-ty] [name ...]   (defaults to every repo in repos.txt)
+Usage: uv run corpus/run.py [--tools ty,taskless,pylint,ruff] [name ...]
+       (defaults to every tool, and every repo in repos.txt)
 
 Repos are shallow-cloned at their pinned commit into corpus/.repos/ (gitignored).
-Results land in corpus/results/, one line per finding, sorted, so a rule change
-shows up as a plain diff of those files.
+Results land in corpus/results/<tool>.txt, one line per finding, sorted, so a rule
+change shows up as a plain diff of those files.
+
+ruff has no always-true-condition rule, so ruff.txt is not a ruff scan of the whole
+repo. It holds what ruff's correctness rules say about the lines the other three
+tools flag, which is how the post can say whether ruff noticed anything there.
 """
 
-import json
-import re
 import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from tools import run_pylint, run_ruff, run_taskless, run_ty  # noqa: E402
+
 CORPUS = ROOT / "corpus"
 REPOS = CORPUS / ".repos"
 RESULTS = CORPUS / "results"
-TASKLESS = ["npx", "-y", "@taskless/cli-nightly@0.12.0-20261006162512x92b3715"]
-# The runtime rule is hand-written, so the Taskless service never signed it, and a plain
-# `check` skips it. This flag runs its check.ts anyway. Read that file before you pass it.
-UNSIGNED = "--dangerously-run-scripts"
-TY_LINE = re.compile(r"^(?P<loc>[^:]+:\d+:\d+): \w+\[(?P<rule>redundant-condition[a-z-]*)\] (?P<msg>.*)$")
+ALL_TOOLS = ["ty", "taskless", "pylint", "ruff"]
 
 
 def read_repos():
@@ -51,39 +53,34 @@ def checkout(name, url, sha):
     return dest
 
 
-def run_taskless(name):
-    proc = subprocess.run(
-        [*TASKLESS, "check", "--json", UNSIGNED, f"corpus/.repos/{name}"],
-        cwd=ROOT, capture_output=True, text=True,
-    )
-    # One malformed rule stops ast-grep for every rule, and that reads as zero findings.
-    # Refuse to record a scan that didn't run, rather than saving an empty result.
-    report = json.loads(proc.stdout or "{}")
-    if not report.get("success"):
-        sys.exit(f"taskless check failed on {name}:\n{proc.stdout or proc.stderr}")
-    prefix = f"corpus/.repos/{name}/"
-    rows = []
-    for r in report.get("results", []):
-        start = r["range"]["start"]
-        path = r["file"].removeprefix(prefix)
-        rows.append(f"{name}/{path}:{start['line'] + 1}:{start['column'] + 1}  {r['ruleId']}")
-    return rows
+def scan(tool, name, dest, flagged):
+    """One tool over one repo, as result lines prefixed with the repo name."""
+    if tool == "taskless":
+        # Taskless runs from this repo so it uses our .taskless/ rules.
+        prefix = f"corpus/.repos/{name}/"
+        return [f"{name}/{h.file.removeprefix(prefix)}:{h.line}:{h.column}  {h.rule}"
+                for h in run_taskless([prefix.rstrip("/")])]
+    if tool == "ty":
+        # Strict is only switched on for the examples. Here ty runs at its defaults.
+        hits = run_ty(["."], cwd=dest, strict=False)
+    elif tool == "pylint":
+        hits = run_pylint(["."], cwd=dest)
+    else:
+        hits = [h for h in run_ruff(["."], cwd=dest) if (h.file, h.line) in flagged]
+    return [f"{name}/{h.file}:{h.line}:{h.column}  {h.rule}  {h.message}" for h in hits]
 
 
-def run_ty(name, dest):
-    # Run from inside the repo with our pinned ty. The strict variant is off by default in
-    # ty and only switched on in this repo's pyproject for the examples, so ignore it here.
-    out = subprocess.run(
-        ["uv", "run", "--project", str(ROOT), "ty", "check", "--output-format", "concise",
-         "--exit-zero", "--ignore", "redundant-condition-strict", "."],
-        cwd=dest, capture_output=True, text=True,
-    ).stdout
-    rows = []
-    for line in out.splitlines():
-        m = TY_LINE.match(line)
-        if m:
-            rows.append(f"{name}/{m['loc']}  {m['rule']}  {m['msg']}")
-    return rows
+def flagged_lines(name):
+    """(file, line) pairs any of ty, taskless or pylint flagged in this repo, from saved results."""
+    lines = set()
+    for tool in ["ty", "taskless", "pylint"]:
+        path = RESULTS / f"{tool}.txt"
+        for row in path.read_text().splitlines() if path.exists() else []:
+            repo, rest = row.split("/", 1)
+            if repo == name:
+                file, line, _ = rest.split()[0].rsplit(":", 2)
+                lines.add((file, int(line)))
+    return lines
 
 
 def write(kind, names, rows):
@@ -95,29 +92,33 @@ def write(kind, names, rows):
 
 def main():
     args = sys.argv[1:]
-    skip_ty = "--skip-ty" in args
-    wanted = [a for a in args if not a.startswith("--")]
-    repos = [r for r in read_repos() if not wanted or r[0] in wanted]
+    tools = ALL_TOOLS
+    if "--tools" in args:
+        k = args.index("--tools")
+        tools = [t for t in ALL_TOOLS if t in args[k + 1].split(",")]
+        del args[k:k + 2]
+    repos = [r for r in read_repos() if not args or r[0] in args]
+    names = {r[0] for r in repos}
     RESULTS.mkdir(parents=True, exist_ok=True)
 
-    taskless_rows, ty_rows = [], []
+    dests = {}
     for name, url, sha in repos:
-        dest = checkout(name, url, sha)
-        print(f"  scanning {name}", file=sys.stderr)
-        taskless_rows += run_taskless(name)
-        if not skip_ty:
-            ty_rows += run_ty(name, dest)
+        dests[name] = checkout(name, url, sha)
+    # ruff goes last: it reports on the lines the other tools' saved results flag.
+    for tool in tools:
+        rows = []
+        for name in sorted(names):
+            print(f"  {tool}: {name}", file=sys.stderr)
+            flagged = flagged_lines(name) if tool == "ruff" else set()
+            rows += scan(tool, name, dests[name], flagged)
+        write(tool, names, rows)
 
-    names = {r[0] for r in repos}
-    write("taskless", names, taskless_rows)
-    if not skip_ty:
-        write("ty", names, ty_rows)
-
-    for kind in ["taskless", "ty"]:
-        lines = (RESULTS / f"{kind}.txt").read_text().splitlines()
+    for tool in ALL_TOOLS:
+        path = RESULTS / f"{tool}.txt"
+        lines = path.read_text().splitlines() if path.exists() else []
         rules = Counter(l.split()[1] for l in lines)
         detail = ", ".join(f"{r} {n}" for r, n in sorted(rules.items()))
-        print(f"{kind}: {len(lines)} ({detail})" if lines else f"{kind}: 0")
+        print(f"{tool}: {len(lines)}" + (f" ({detail})" if lines else ""))
 
 
 if __name__ == "__main__":

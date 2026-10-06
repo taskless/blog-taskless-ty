@@ -1,6 +1,6 @@
 # taskless-and-ty
 
-On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs both tools over the same code.
+On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs both tools over the same code. pylint and ruff run alongside, since they're the linters a Python team already has.
 
 ## Run it
 
@@ -8,7 +8,7 @@ You need [uv](https://docs.astral.sh/uv/) and Node.
 
 ```sh
 uv sync
-scripts/compare.sh              # ty and Taskless over examples/, side by side
+scripts/compare.sh              # ty, Taskless, pylint and ruff over examples/, side by side
 scripts/compare.sh path/to/code # or over anything else
 ```
 
@@ -27,7 +27,7 @@ npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 test .taskless/rules/run
 
 Both scripts pass `--dangerously-run-scripts` to `taskless check`. The runtime rule below runs code, and Taskless only runs runtime rules its service signed. A rule written by hand never gets that signature, so without the flag `check` skips it. Read `check.ts` before you run it. That's what the flag is asking you to do.
 
-ty is pinned to 0.0.84. The rules use the per-rule directory layout from Taskless 0.12, so for now they need the nightly CLI.
+ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The rules use the per-rule directory layout from Taskless 0.12, so for now they need the nightly CLI.
 
 ## Scorecard
 
@@ -45,7 +45,15 @@ Current output of `scripts/compare.sh` over `examples/`:
 | same | `always-truthy-typeddict-inherited` (runtime) | Matches ty, including inheritance across files, `import ... as`, relative imports, `total=False`, `Required[]` and `NotRequired[]` |
 | `elif isinstance(x, str)` exhaustiveness | none | Needs union narrowing, which is a type checker's job. ty ships it off by default, and `pyproject.toml` turns it on here |
 
-Totals: ty 15, Taskless 13, both 13. Taskless flags nothing ty doesn't.
+Totals: ty 15, Taskless 13, pylint 5, ruff 0. Taskless and pylint flag nothing on these examples that ty doesn't.
+
+## pylint and ruff
+
+pylint has had a check for this for years: `using-constant-test` (W0125). It looks at the condition itself, with no types. It catches an uncalled function in an `if` or a ternary, and a generator expression, including the `gen = (...)` variable case the Taskless rule misses. It doesn't catch the `while` or `and` forms, a missing `await`, or anything that needs a type (Enum, TypedDict, tuple), so it gets 5 of ty's 15.
+
+ruff never ported W0125, and nothing else in it targets a condition that's always true. To be sure, `compare.sh` runs ruff's correctness families (`F`, `B`, `PLE`, `PLW`, `RUF`, `ASYNC`, with preview rules on) and shows anything they say about the flagged lines. On the examples that's nothing. Across the corpus, ruff's findings on those lines are about something else, like an undefined name or a mutable default argument.
+
+That matters for the argument here. A team that lints with ruff alone has no coverage for this class of bug until they adopt ty. A few Taskless rules close most of that gap today.
 
 ## Real codebases
 
@@ -53,7 +61,11 @@ Totals: ty 15, Taskless 13, both 13. Taskless flags nothing ty doesn't.
 
 ty reports 28. Most are outside the thread's examples: string literals, modules, `TypeVar`s, and `tuple[()]` class attributes in Django's admin that subclasses override. Three are uncalled functions. One of those (black's test data) is the same line the Taskless rules flag. The other two need resolution a single-file rule can't do: `Field` imported from pydantic, and `Foo.bar` reassigned on a class.
 
-The Taskless rules report 2. One is that shared black line. The other is a false positive: `foo` used on line 18 of a file whose `def foo` is on line 70. ty knows definition order and ast-grep doesn't.
+The Taskless rules report 2. One is that shared black line. The other is a false positive: `foo` used on line 18 of a file whose `def foo` is on line 70. ty knows definition order and ast-grep doesn't. (ruff's F821 agrees: `foo` is an undefined name there.)
+
+pylint reports 93, and 4 of them are lines ty also flags. 86 are in black's formatter test data, mostly literal `if True:` and `while 1:`. pylint flags a literal constant and ty deliberately doesn't, since those are usually on purpose. 3 are false positives in Django: `if cls.view_is_async:` reads a `@classproperty`, and without types pylint sees a function and stops there. The last 4 are in pydantic, including an `elif False:` typing idiom.
+
+ruff's file (`corpus/results/ruff.txt`) holds what it said about the lines the other three flagged: 38 findings, none of them about the condition.
 
 ## How the rules got to 2
 
@@ -104,6 +116,7 @@ examples/                 thread code plus negative cases, one file per check
 .taskless/rules/runtime/  the cross-file TypedDict rule: captures/, check.ts, .tests/pass and fail
 pyproject.toml            pins ty
 scripts/compare.sh        the side-by-side table
+scripts/tools.py          how each of the four tools is run, shared by both scripts
 corpus/run.py             the real-codebase run; repos pinned in corpus/repos.txt
 corpus/results/           every finding from both tools, one per line
 ```
