@@ -2,6 +2,8 @@
 
 On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs it next to ty over the same code. pylint and ruff run alongside, since they're the linters a Python team already has.
 
+What we learned along the way, including what didn't work, is in [`notes/`](notes/).
+
 ## Run it
 
 You need [uv](https://docs.astral.sh/uv/) and Node 22.22 or later.
@@ -65,7 +67,7 @@ ty reports 28. Most are outside the thread's examples: string literals, modules,
 
 The Taskless rules report 2. One is that shared black line. The other is a false positive: `foo` used on line 18 of a file whose `def foo` is on line 70. ty knows definition order and ast-grep doesn't. (ruff's F821 agrees: `foo` is an undefined name there.)
 
-pylint reports 93, and 4 of them are lines ty also flags. 86 are in black's formatter test data, mostly literal `if True:` and `while 1:`. pylint flags a literal constant and ty deliberately doesn't, since those are usually on purpose. 3 are false positives in Django: `if cls.view_is_async:` reads a `@classproperty`, and without types pylint sees a function and stops there. The last 4 are in pydantic, including an `elif False:` typing idiom.
+pylint reports 93, and 4 of them are lines ty also flags. 86 are in black's formatter test data, mostly literal `True` and `False` conditions like `if True:`. pylint flags a literal constant and ty deliberately doesn't, since those are usually on purpose. 3 are false positives in Django: `if cls.view_is_async:` reads a `@classproperty`, and without types pylint sees a function and stops there. The last 4 are in pydantic, including an `elif False:` typing idiom.
 
 ruff's file (`corpus/results/ruff.txt`) holds what it said about the lines the other three flagged: 38 findings, none of them about the condition.
 
@@ -113,6 +115,7 @@ It's still name resolution. `Payload = Order` as a type alias, a TypedDict built
 ## Layout
 
 ```
+notes/                         what we learned, tried and found, for the post
 examples/                      thread code plus negative cases, one file per check
 examples/compare.expected.txt  the table CI expects compare.sh to print
 .taskless/rules/sg/            one directory per rule, each with a .tests/ file
