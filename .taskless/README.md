@@ -8,10 +8,10 @@ Run the Taskless scanner from your repository root:
 
 ```sh
 # npm / pnpm
-pnpm dlx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 check
+pnpm dlx @taskless/cli@0.12.0 check
 
 # npx
-npx @taskless/cli-nightly@0.12.0-20261006162512x92b3715 check
+npx @taskless/cli@0.12.0 check
 ```
 
 ## Files

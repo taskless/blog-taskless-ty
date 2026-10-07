@@ -10,6 +10,6 @@
     "compare": "scripts/compare.sh"
   },
   "devDependencies": {
-    "@taskless/cli-nightly": "0.12.0-20261006162512x92b3715"
+    "@taskless/cli": "0.12.0"
   }
 }
