@@ -11,4 +11,4 @@ What we learned building this repo: what we tried, what broke, and what it says 
 - [ty-observations.md](ty-observations.md) records what we noticed about ty along the way, including where it's arguably wrong.
 - [open-questions.md](open-questions.md) lists what's undecided.
 
-Versions throughout: ty 0.0.84, Taskless CLI 0.12.0 nightly (ast-grep 0.45.3), pylint 4.1.2, ruff 0.16.10. The corpus is django, flask, httpx, rich, black and pydantic at the commits in `corpus/repos.txt`, 4,111 Python files in all.
+Versions throughout: ty 0.0.84, Taskless CLI 0.12.0 (ast-grep 0.45.3), pylint 4.1.2, ruff 0.16.10. The corpus is django, flask, httpx, rich, black and pydantic at the commits in `corpus/repos.txt`, 4,111 Python files in all.
