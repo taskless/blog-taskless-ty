@@ -16,7 +16,7 @@ Fixtures prove a rule does what its author imagined. A corpus proves what it doe
 
 One matches ty: `bar=a if foo else b` in black's formatter test data, where `foo` is a function. It's a fixture that never runs, so it's a true positive for the rule and a harmless one for black.
 
-The other is a false positive we kept on purpose. `foo` is used on line 18 of a file whose `def foo` is on line 70. The file is formatter test data and never runs, but if it did, `foo` would be undefined at that point. ty knows definition order, and ast-grep has no notion of it. ruff's F821 (undefined name) flags the same line, which confirms what's actually wrong there.
+The other is a false positive we kept on purpose. `foo` is used on line 18 of a file whose `def foo` is on line 70. The file is formatter test data and never runs, but if it did, `foo` would be undefined at that point. ty knows `foo` isn't bound yet. ast-grep can express source order with `precedes` and `follows`, but the rule doesn't use them. ruff's F821 (undefined name) flags the same line, which confirms what's actually wrong there.
 
 ## The fix that came from a mistake
 

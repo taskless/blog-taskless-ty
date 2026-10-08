@@ -30,7 +30,7 @@ Without that cross-check, both fixtures would have encoded a wrong idea of what 
 
 ## Prove the zero
 
-On the corpus the rule reports nothing, and so does ty. A zero could also mean the rule never ran. So we planted a two-file TypedDict bug inside Django's source tree and ran it again. It was caught in about 4 seconds, resolving the import through Django's package layout. A runtime check gets 10 seconds by default.
+On the corpus the rule reports nothing, and so does ty. A zero could also mean the rule never ran. So we planted a two-file TypedDict bug inside Django's source tree and ran it again. It was caught, resolving the import through Django's package layout, and a full `taskless check` over Django took about 5 seconds. `uv run corpus/plant.py` reproduces it. A runtime check gets 10 seconds by default.
 
 ## Unsigned code doesn't run by default
 

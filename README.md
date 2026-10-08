@@ -55,7 +55,7 @@ Totals: ty 15, Taskless 13, pylint 5, ruff 0. Taskless and pylint flag nothing o
 
 ## pylint and ruff
 
-pylint has had a check for this for years: `using-constant-test` (W0125). It looks at the condition itself, with no types. It catches an uncalled function in an `if` or a ternary, and a generator expression, including the `gen = (...)` variable case the Taskless rule misses. It doesn't catch the `while` or `and` forms, a missing `await`, or anything that needs a type (Enum, TypedDict, tuple), so it gets 5 of ty's 15.
+pylint has had a check for this for years: `using-constant-test` (W0125). It looks at the condition itself, using astroid's inference rather than a type checker. It catches an uncalled function in an `if` or a ternary, and a generator expression, including the `gen = (...)` variable case the Taskless rule misses. It doesn't catch the `while` or `and` forms, a missing `await`, or anything that needs a type (Enum, TypedDict, tuple), so it gets 5 of ty's 15.
 
 ruff never ported W0125. It does catch a few always-true shapes: `F634` flags `if (a, b):` (a tuple is always true), `F631` the same in an `assert`, and `SIM222`/`SIM223` flag `x or True` and `x and False`. None of them covers a case from the thread. To check, `compare.sh` runs ruff's correctness families (`F`, `B`, `PLE`, `PLW`, `RUF`, `ASYNC`, with preview rules on) and shows anything they say about the flagged lines. On the examples that's nothing. Across the corpus, ruff's findings on those lines are mostly about something else, like an undefined name or a mutable default argument.
 
@@ -67,7 +67,7 @@ That matters for the argument here. A team that lints with ruff alone gets none 
 
 ty reports 28. Most are outside the thread's examples: string literals, `...`, modules, `TypeVar`s, and empty-tuple attributes on Django's `ModelAdmin` and `QuerySet`. Three are uncalled functions, all in test code. One (black's formatter test data) is the same line the Taskless rules flag. The other two are `assert Field` and `assert Foo.bar` in pydantic's tests, which need resolution a single-file rule can't do. None is in code that ships, so on mature codebases these bugs are rare. The thread says Astral "found and fixed multiple bugs like this internally," which is where a check like this earns its keep: catching the next one before it merges.
 
-The Taskless rules report 2. One is that shared black line. The other is a false positive: `foo` used on line 18 of a file whose `def foo` is on line 70. ty knows definition order, and ast-grep has no notion of it. (ruff's F821 agrees: `foo` is an undefined name there.)
+The Taskless rules report 2. One is that shared black line. The other is a false positive: `foo` used on line 18 of a file whose `def foo` is on line 70. At that point `foo` isn't bound yet, which ty knows. (ruff's F821 agrees: `foo` is an undefined name there.) ast-grep can express source order with `precedes` and `follows`, but the rule doesn't use them.
 
 pylint reports 93, and 4 of them are lines ty also flags. 86 are in black's formatter test data, mostly literal `True` and `False` conditions like `if True:`. pylint flags those, and ty deliberately skips a condition that is `True`, `False` or an integer, since those are usually on purpose. 3 are false positives in Django: `if cls.view_is_async:` reads a `@classproperty`, and without types pylint sees a function and stops there. The last 4 are in pydantic, including an `elif False:` typing idiom.
 
@@ -110,7 +110,7 @@ When a name can't be resolved to exactly one class (a third-party base, a star i
 
 Its fixtures are directories, because the evidence spans files: five that must fire (including one across two files and one through a relative `as` import) and five that must stay quiet (all keys optional, a same-named class in another module, an unresolvable third-party base). ty agrees with all ten.
 
-Over the corpus it reports nothing, the same as ty. To prove that zero meant "ran and found nothing", a planted two-file TypedDict inside Django's tree was caught in about 4 seconds, well inside the 10-second budget a check gets.
+Over the corpus it reports nothing, the same as ty. To prove that zero meant "ran and found nothing", a planted two-file TypedDict inside Django's tree is caught by a full `taskless check` over Django in about 5 seconds, well inside the 10-second budget a check gets. `uv run corpus/plant.py` plants it, checks, and removes it again.
 
 It's still name resolution. `Payload = Order` as a type alias, a TypedDict built with the functional syntax, or a class reached through `import app.models` and used as `app.models.Order` all resolve to nothing, so they're silent misses rather than wrong answers.
 
@@ -126,6 +126,7 @@ scripts/compare.sh             the side-by-side table
 scripts/tools.py               how each of the four tools is run, shared by both scripts
 corpus/repos.txt               the six codebases, each pinned to a commit
 corpus/run.py                  the real-codebase run
+corpus/plant.py                the planted TypedDict bug in Django's tree
 corpus/results/                each tool's findings, one per line
 .github/workflows/             CI: rule tests and the snapshot check
 pyproject.toml                 pins ty, pylint and ruff
