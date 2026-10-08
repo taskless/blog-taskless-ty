@@ -10,7 +10,7 @@ The `sg` rule and the runtime rule both flag a TypedDict defined in the same fil
 
 ## Stable CLI
 
-The rules use Taskless 0.12's per-rule directory layout, so the repo pins a 0.12 nightly. When 0.12 ships stable, that's one line in `package.json`.
+Resolved. The rules use Taskless 0.12's per-rule directory layout. The repo pinned a 0.12 nightly until 0.12.0 shipped stable, and now pins 0.12.0.
 
 ## Beyond Python
 

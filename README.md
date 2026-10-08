@@ -31,7 +31,7 @@ CI (`.github/workflows/check.yml`) runs those tests and `compare.sh` on every pu
 
 Both scripts pass `--dangerously-run-scripts` to `taskless check`. The runtime rule below runs code, and Taskless only runs runtime rules its service signed. A rule written by hand never gets that signature, so without the flag `check` skips it. Read `check.ts` before you run it. That's what the flag is asking you to do.
 
-ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The Taskless CLI is pinned in `package.json`. The rules use the per-rule directory layout from Taskless 0.12, so for now that's the nightly build.
+ty (0.0.84), pylint (4.1.2) and ruff (0.16.10) are pinned in `pyproject.toml`. The Taskless CLI (0.12.0) is pinned in `package.json`. The rules use its per-rule directory layout, so they need 0.12 or later.
 
 ## Scorecard
 
