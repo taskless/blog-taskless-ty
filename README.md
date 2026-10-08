@@ -131,3 +131,7 @@ corpus/results/                each tool's findings, one per line
 pyproject.toml                 pins ty, pylint and ruff
 package.json                   pins the Taskless CLI
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
