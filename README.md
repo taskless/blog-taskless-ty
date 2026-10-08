@@ -39,7 +39,7 @@ What `scripts/compare.sh` shows over `examples/`, by thread example:
 
 | Thread example | Taskless rule | Result |
 | --- | --- | --- |
-| `if condition:` on an uncalled function | `uncalled-function-in-condition` | Matches ty, including `while`, ternary and `and` forms |
+| `if condition:` on an uncalled function | `uncalled-function-in-condition` | Matches ty, including `while`, `assert`, ternary and `and` forms |
 | `if f:` on an uncalled `async def` | `uncalled-function-in-condition` | Matches ty |
 | `if f():` with no `await` (not in the thread; ty flags it too) | `unawaited-coroutine-in-condition` | Matches ty |
 | `if (x for x in xs):` | `generator-in-condition` | 3 of 4. Misses `gen = (...)` followed by `if gen:`, which pylint catches |

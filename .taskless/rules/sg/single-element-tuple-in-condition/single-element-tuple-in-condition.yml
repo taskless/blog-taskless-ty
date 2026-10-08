@@ -12,6 +12,10 @@ rule:
         - inside: { kind: if_statement, field: condition }
         - inside: { kind: elif_clause, field: condition }
         - inside: { kind: while_statement, field: condition }
+        # `assert cond, msg`: the first operand is the condition, the second a message.
+        - all:
+            - nthChild: 1
+            - inside: { kind: assert_statement }
         - inside: { kind: not_operator }
     - inside:
         kind: class_definition

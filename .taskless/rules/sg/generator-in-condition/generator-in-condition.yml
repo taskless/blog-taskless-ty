@@ -14,6 +14,10 @@ utils:
       - inside: { kind: if_statement, field: condition }
       - inside: { kind: elif_clause, field: condition }
       - inside: { kind: while_statement, field: condition }
+      # `assert cond, msg`: the first operand is the condition, the second a message.
+      - all:
+          - nthChild: 1
+          - inside: { kind: assert_statement }
       - all:
           - nthChild: 2
           - inside: { kind: conditional_expression }

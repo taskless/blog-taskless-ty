@@ -27,7 +27,17 @@ valid:
         safe = isinstance(v, str)
         if safe:
             pass
+  - |
+    def cond(): ...
+    assert cond(), "called"
+  - |
+    def describe(): ...
+    def t(x):
+        assert x, describe
 invalid:
+  - |
+    def cond(): ...
+    assert cond
   - |
     def cond(): ...
     if cond:
