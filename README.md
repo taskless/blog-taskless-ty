@@ -1,4 +1,4 @@
-# taskless-and-ty
+# blog-taskless-ty
 
 On 2026-09-24 Charlie Marsh [posted a thread](https://x.com/charliermarsh/status/2103199517294166518) about ty's new `redundant-condition` check, which flags conditions that are always true or always false. The classic case is `if condition:` where `condition` is a function nobody called. Those are lint-shaped bugs, so this repo rebuilds each example from the thread as a [Taskless](https://taskless.io) rule and runs it next to ty over the same code. pylint and ruff run alongside, since they're the linters a Python team already has.
 
@@ -79,13 +79,13 @@ The first draft passed every one of its own tests and flagged 23 lines across th
 
 | Commit | Change | Corpus hits |
 | --- | --- | --- |
-| [`first-draft`](https://github.com/theCodeDrift/taskless-and-ty/commit/c3ae703) | Six rules, all tests green | 23 |
-| [`45f2bdf`](https://github.com/theCodeDrift/taskless-and-ty/commit/45f2bdf) | Match only the condition of a ternary. `enumerate_reversed if r else enumerate` was being flagged for its values | 17 |
-| [`3af704e`](https://github.com/theCodeDrift/taskless-and-ty/commit/3af704e) | Count `and`/`or`/`not` only inside a condition. `convert or lam_sub` is a fallback value | 16 |
-| [`09a5b56`](https://github.com/theCodeDrift/taskless-and-ty/commit/09a5b56) | Skip a name a local assignment shadows. Django's `safe = isinstance(...)` sits in a module with a `safe()` function | 14 |
-| [`449a683`](https://github.com/theCodeDrift/taskless-and-ty/commit/449a683) | Flag a 1-tuple only when a condition tests it. All 12 annotation hits were intentional 1-tuples | 2 |
+| [`first-draft`](https://github.com/taskless/blog-taskless-ty/commit/c3ae703) | Six rules, all tests green | 23 |
+| [`45f2bdf`](https://github.com/taskless/blog-taskless-ty/commit/45f2bdf) | Match only the condition of a ternary. `enumerate_reversed if r else enumerate` was being flagged for its values | 17 |
+| [`3af704e`](https://github.com/taskless/blog-taskless-ty/commit/3af704e) | Count `and`/`or`/`not` only inside a condition. `convert or lam_sub` is a fallback value | 16 |
+| [`09a5b56`](https://github.com/taskless/blog-taskless-ty/commit/09a5b56) | Skip a name a local assignment shadows. Django's `safe = isinstance(...)` sits in a module with a `safe()` function | 14 |
+| [`449a683`](https://github.com/taskless/blog-taskless-ty/commit/449a683) | Flag a 1-tuple only when a condition tests it. All 12 annotation hits were intentional 1-tuples | 2 |
 
-One more commit, [`79be20c`](https://github.com/theCodeDrift/taskless-and-ty/commit/79be20c), came out of a mistake. A YAML error in one rule stopped ast-grep for every rule, and the corpus script recorded that as zero hits. Taskless reported the failure. The script wasn't checking for it. Now it does.
+One more commit, [`79be20c`](https://github.com/taskless/blog-taskless-ty/commit/79be20c), came out of a mistake. A YAML error in one rule stopped ast-grep for every rule, and the corpus script recorded that as zero hits. Taskless reported the failure. The script wasn't checking for it. Now it does.
 
 ## Where the rules stop
 

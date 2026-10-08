@@ -1,5 +1,5 @@
 [project]
-name = "taskless-and-ty"
+name = "blog-taskless-ty"
 version = "0.1.0"
 description = "ty's redundant-condition checks rebuilt as Taskless rules, side by side"
 requires-python = ">=3.12"

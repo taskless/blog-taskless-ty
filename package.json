@@ -1,5 +1,5 @@
 {
-  "name": "taskless-and-ty",
+  "name": "blog-taskless-ty",
   "private": true,
   "description": "ty's redundant-condition checks rebuilt as Taskless rules, side by side with ty, pylint and ruff",
   "engines": {

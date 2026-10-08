@@ -139,7 +139,7 @@ wheels = [
 ]
 
 [[package]]
-name = "taskless-and-ty"
+name = "blog-taskless-ty"
 version = "0.1.0"
 source = { virtual = "." }
 
